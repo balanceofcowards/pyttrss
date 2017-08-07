@@ -1,0 +1,4 @@
+venv
+pyttrss.cfg
+*.pyc
+*.swp
