@@ -4,7 +4,6 @@
 
     (c) 2017 Andreas Fischer
 """
-import json
 import requests
 
 class TinyTinyRSS(object):
@@ -30,8 +29,8 @@ class TinyTinyRSS(object):
         """ Execute a single REST call to the API with parameter 'data'."""
         if self.session_id:
             data["sid"] = self.session_id
-        req = requests.get(self.url, data=json.dumps(data))
-        return json.loads(req.text)
+        req = requests.get(self.url, json=data)
+        return req.json()
 
     def newarticles(self):
         """ Get a list of all new articles. """
