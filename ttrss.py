@@ -374,15 +374,15 @@ class TinyTinyRSS(object):
                 "content": content}
         self.rest(req)
 
-    def subscribeToFeed(self, feed_url, category_id=0, login, password):
+    def subscribeToFeed(self, feed_url, login, password, category_id = 0):
         """
         Subscribes to specified feed, returns a status code. See
         subscribe_to_feed() in functions.php for details.
         Parameters:
             * feed_url - Feed URL (string)
+            * login, password - Self explanatory (string)
             * category_id - Category id to place feed into (defaults to 0,
               Uncategorized) (int)
-            * login, password - Self explanatory (string)
         """
         req = {"op": "subscribeToFeed", "feed_url": feed_url,
                 "category_id": category_id, "login": login,
