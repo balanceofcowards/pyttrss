@@ -22,11 +22,12 @@ class TinyTinyRSS(object):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        data = {"op": "logout"}
-        self.rest(data)
+        if self.session_id:
+            data = {"op": "logout"}
+            self.rest(data)
 
     def rest(self, data):
-        """ Execute a single REST call to the API with parameter 'data'."""
+        """ Execute a single REST call to the API with JSON-encoded parameter 'data'."""
         if self.session_id:
             data["sid"] = self.session_id
         req = requests.get(self.url, json=data)
