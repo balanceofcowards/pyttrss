@@ -236,162 +236,175 @@ class TinyTinyRSS(object):
         return self.rest(req)['content']
 
     def updateArticle(self, article_ids, mode, field, data=None):
+        """
+        Update information on specified articles.
+        Parameters:
+            * article_ids (comma-separated list of integers) - article IDs to
+              operate on
+            * mode (integer) - type of operation to perform (0 - set to false,
+              1 - set to true, 2 - toggle)
+            * field (integer) - field to operate on (0 - starred, 1 -
+              published, 2 - unread, 3 - article note since api level 1)
+            * data (string) - optional data parameter when setting note field
+              (since api level 1)
+        E.g. to set unread status of articles X and Y to false use the following:
+        updateArticle([X, Y], 0, 2)
+        Returns the number of articles updated by the query.
+        """
         req = {"op": "updateArticle", "mode": mode, "field": field,
                 "data": data}
-        req["article_ids"] = ",".join(article_ids)
-
-"""
-Update information on specified articles.
-
-Parameters:
-
-    article_ids (comma-separated list of integers) - article IDs to operate on
-    mode (integer) - type of operation to perform (0 - set to false, 1 - set to true, 2 - toggle)
-    field (integer) - field to operate on (0 - starred, 1 - published, 2 - unread, 3 - article note since api level 1)
-    data (string) - optional data parameter when setting note field (since api level 1)
-
-E.g. to set unread status of articles X and Y to false use the following:
-
-?article_ids=X,Y&mode=0&field=2
-
-Since version:1.5.0 returns a status message:
-
-{"status":"OK","updated":1}
-
-“Updated” is number of articles updated by the query.
-getArticle
-
-Requests JSON-encoded article object with specific ID.
-
-    article_id (integer) - article ID to return as of 15.10.2010 git or version:1.5.0 supports comma-separated list of IDs
-
-Since version:1.4.3 also returns article attachments.
-getConfig
-
-Returns tt-rss configuration parameters:
-
-{"icons_dir":"icons","icons_url":"icons","daemon_is_running":true,"num_feeds":71}
-
-    icons_dir - path to icons on the server filesystem
-    icons_url - path to icons when requesting them over http
-    daemon_is_running - whether update daemon is running
-    num_feeds - amount of subscribed feeds (this can be used to refresh feedlist when this amount changes)
-
-updateFeed
-
-Tries to update specified feed. This operation is not performed in the background, so it might take considerable time and, potentially, be aborted by the HTTP server.
-
-    feed_id (integer) - ID of feed to update
-
-Returns status-message if the operation has been completed.
-
-{"status":"OK"}
-
-getPref
-
-Returns preference value of specified key.
-
-    pref_name (string) - preference key to return value of
-
-{"value":true}
-
-catchupFeed
-
-Required version: version:1.4.3
-
-Tries to catchup (e.g. mark as read) specified feed.
-
-Parameters:
-
-    feed_id (integer) - ID of feed to update
-    is_cat (boolean) - true if the specified feed_id is a category
-
-Returns status-message if the operation has been completed.
-
-{"status":"OK"}
-
-getCounters
-
-Required version: version:1.5.0
-
-Returns a list of unread article counts for specified feed groups.
-
-Parameters:
-
-    output_mode (string) - Feed groups to return counters for
-
-Output mode is a character string, comprising several letters (defaults to “flc”):
-
-    f - actual feeds
-    l - labels
-    c - categories
-    t - tags
-
-Several global counters are returned as well, those can’t be disabled with output_mode.
-getLabels (since API level 1)
-
-Returns list of configured labels, as an array of label objects:
-
-{"id":2,"caption":"Debian","fg_color":"#e14a00","bg_color":"#ffffff","checked":false},
-
-Before version:1.7.5
-
-Returned id is an internal database id of the label, you can convert it to the valid feed id like this:
-
-feed_id = -11 - label_id
-
-After:
-
-No conversion is necessary.
-
-Parameters:
-
-    article_id (int) - set “checked” to true if specified article id has returned label.
-
-setArticleLabel (since API level 1)
-
-Assigns article_ids to specified label.
-
-Parameters:
-
-    article_ids - comma-separated list of article ids
-    label_id (int) - label id, as returned in getLabels
-    assign (boolean) - assign or remove label
-
-Note: Up until version:1.15 setArticleLabel() clears the label cache for the specified articles. Make sure to regenerate it (e.g. by calling API method getLabels() for the respecting articles) when you’re using methods which don’t do that by themselves (e.g. getHeadlines()) otherwise getHeadlines() will not return labels for modified articles.
-shareToPublished (since API level 4 - version:1.6.0)
-
-Creates an article with specified data in the Published feed.
-
-Parameters:
-
-    title - Article title (string)
-    url - Article URL (string)
-    content - Article content (string)
-
-subscribeToFeed (API level 5 - version:1.7.6)
-
-Subscribes to specified feed, returns a status code. See subscribe_to_feed() in functions.php for details.
-
-Parameters:
-
-    feed_url - Feed URL (string)
-    category_id - Category id to place feed into (defaults to 0, Uncategorized) (int)
-    login, password - Self explanatory (string)
-
-unsubscribeFeed (API level 5 - version:1.7.6)
-
-Unsubscribes specified feed.
-
-Parameters:
-
-    feed_id - Feed id to unsubscribe from
-
-getFeedTree (API level 5 - version:1.7.6)
-
-    include_empty (bool) - include empty categories
-
-Returns full tree of categories and feeds.
-
-Note: counters for most feeds are not returned with this call for performance reasons.
-"""
+        if hasattr(article_ids, "__iter__"):
+            article_list = [str(article) for article in article_ids]
+            req["article_ids"] = ",".join(article_list)
+        else:
+            req["article_ids"] = str(article_ids)
+        return self.rest(req)['content']['updated']
+
+    def getArticle(self, article_id):
+        """
+        Requests JSON-encoded article object with specific ID.
+            * article_id (integer) - article ID to return as of 15.10.2010 git
+            or version:1.5.0 supports comma-separated list of IDs
+        Since version:1.4.3 also returns article attachments.
+        """
+        req = {"op": "getArticle"}
+        if hasattr(article_id, "__iter__"):
+            article_list = [str(article) for article in article_id]
+            req["article_id"] = ",".join(article_list)
+        else:
+            req["article_id"] = str(article_id)
+        return self.rest(req)['content']
+
+    def getConfig(self):
+        """
+        Returns tt-rss configuration parameters:
+        {"icons_dir":"icons","icons_url":"icons","daemon_is_running":true,"num_feeds":71}
+            * icons_dir - path to icons on the server filesystem
+            * icons_url - path to icons when requesting them over http
+            * daemon_is_running - whether update daemon is running
+            * num_feeds - amount of subscribed feeds (this can be used to
+              refresh feedlist when this amount changes)
+        """
+        req = {"op": "getConfig"}
+        return self.rest(req)['content']
+
+    def updateFeed(self, feed_id):
+        """
+        Tries to update specified feed. This operation is not performed in the
+        background, so it might take considerable time and, potentially, be
+        aborted by the HTTP server.
+            * feed_id (integer) - ID of feed to update
+        """
+        req = {"op": "getConfig", "feed_id": feed_id}
+        self.rest(req)
+
+    def getPref(self, pref_name):
+        """
+        Returns preference value of specified key.
+            * pref_name (string) - preference key to return value of
+        """
+        req = {"op": "getConfig", "pref_name": pref_name}
+        return self.rest(req)['content']['value']
+
+    def catchupFeed(self, feed_id, is_cat):
+        """
+        Tries to catchup (e.g. mark as read) specified feed.
+        Parameters:
+            * feed_id (integer) - ID of feed to update
+            * is_cat (boolean) - true if the specified feed_id is a category
+        """
+        req = {"op": "catchupFeed", "feed_id": feed_id, "is_cat": is_cat}
+        self.rest(req)
+
+    def getCounters(self, output_mode="flc"):
+        """
+        Returns a list of unread article counts for specified feed groups.
+        Parameters:
+            * output_mode (string) - Feed groups to return counters for
+        Output mode is a character string, comprising several letters (defaults
+        to “flc”):
+            f - actual feeds
+            l - labels
+            c - categories
+            t - tags
+        Several global counters are returned as well, those can’t be disabled
+        with output_mode.
+        """
+        req = {"op": "getCounters", "output_mode": output_mode}
+        return self.rest(req)['content']
+
+    def getLabels(self, article_id=None):
+        """
+        Returns list of configured labels, as an array of label objects:
+        {"id":2,"caption":"Debian","fg_color":"#e14a00","bg_color":"#ffffff","checked":false},
+        Parameters:
+            * article_id (int) - set “checked” to true if specified article id
+            has returned label.
+        """
+        req = {"op": "getLabels"}
+        if article_id:
+            req["article_id"] = article_id
+        return self.rest(req)['content']
+
+    def setArticleLabel(self, article_ids, label_id, assign):
+        """
+        Assigns article_ids to specified label.
+        Parameters:
+            * article_ids - comma-separated list of article ids
+            * label_id (int) - label id, as returned in getLabels
+            * assign (boolean) - assign or remove label
+        """
+        req = {"op": "setArticleLabel", "label_id": label_id, "assign": assign}
+        if hasattr(article_ids, "__iter__"):
+            article_list = [str(article) for article in article_ids]
+            req["article_ids"] = ",".join(article_list)
+        else:
+            req["article_ids"] = str(article_ids)
+        self.rest(req)
+
+    def shareToPublished(self, title, url, content):
+        """
+        Creates an article with specified data in the Published feed.
+        Parameters:
+            * title - Article title (string)
+            * url - Article URL (string)
+            * content - Article content (string)
+        """
+        req = {"op": "shareToPublished", "title": title, "url": url,
+                "content": content}
+        self.rest(req)
+
+    def subscribeToFeed(self, feed_url, category_id=0, login, password):
+        """
+        Subscribes to specified feed, returns a status code. See
+        subscribe_to_feed() in functions.php for details.
+        Parameters:
+            * feed_url - Feed URL (string)
+            * category_id - Category id to place feed into (defaults to 0,
+              Uncategorized) (int)
+            * login, password - Self explanatory (string)
+        """
+        req = {"op": "subscribeToFeed", "feed_url": feed_url,
+                "category_id": category_id, "login": login,
+                "password": password}
+        self.rest(req)
+
+    def unsubscribeFeed(self, feed_id):
+        """
+        Unsubscribes specified feed.
+        Parameters:
+            * feed_id - Feed id to unsubscribe from
+        """
+        req = {"op": "unsubscribeFeed", "feed_id": feed_id}
+        self.rest(req)
+
+    def getFeedTree(self, include_empty):
+        """
+        Returns full tree of categories and feeds.
+        Parameters:
+            * include_empty (bool) - include empty categories
+        Note: counters for most feeds are not returned with this call for
+        performance reasons.
+        """
+        req = {"op": "getFeedTree", "include_empty": include_empty}
+        return self.rest(req)['content']
