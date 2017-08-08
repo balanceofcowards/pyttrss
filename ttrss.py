@@ -33,17 +33,6 @@ class TinyTinyRSS(object):
             raise Exception(data['content']['error'])
         return data
 
-    def newarticles(self):
-        """ Get a list of all new articles. """
-        req = {"op": "getHeadlines", "feed_id": -3}
-        content = self.rest(req)['content']
-        return content
-
-    def markread(self, article_id):
-        """ Mark a single article as read."""
-        req = {"op": "updateArticle", "article_ids": article_id, "field": 2, "mode": 0}
-        self.rest(req)
-
     def getApiLevel(self):
         """
         Return an abstracted integer API version level, increased with each API
@@ -207,9 +196,7 @@ class TinyTinyRSS(object):
             * include_header (bool) - adds status information when returning
               headlines, instead of array(articles) return value changes to
               array(header, array(articles)) (api 12)
-        Limit:
-        Before API level 6 maximum amount of returned headlines is capped at
-        60, API 6 and above sets it to 200.
+        Limit: Maximum amount of returned headlines is capped at 200.
         These parameters might change in the future (supported since API level 2):
             * search (string) - search query (e.g. a list of keywords)
             * search_mode (string) - all_feeds, this_feed (default),
@@ -229,7 +216,7 @@ class TinyTinyRSS(object):
         """
         params = locals().copy()
         del params["self"]
-        req = {"op": "getCategories"}
+        req = {"op": "getHeadlines"}
         for key, value in params.iteritems():
             if value:
                 req[key] = value
