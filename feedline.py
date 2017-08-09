@@ -43,6 +43,7 @@ def get_conn():
 if __name__ == "__main__":
     with TinyTinyRSS(get_conn()) as ttrss:
         print "Unread articles:", ttrss.getUnread()
+        read_art_ids = []
         for article in ttrss.getHeadlines(feed_id=-3):
             outstr = u"{:>20} | {}".format(article['feed_title'][:20], article['title'])
             print outstr
@@ -54,4 +55,5 @@ if __name__ == "__main__":
                 continue
             elif char == "q":
                 break
-            ttrss.updateArticle(article['id'], 0, 2)
+            read_art_ids.append(article['id'])
+        ttrss.updateArticle(read_art_ids, 0, 2)
