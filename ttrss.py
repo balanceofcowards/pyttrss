@@ -23,6 +23,15 @@ class TinyTinyRSS(object):
         if self.session_id:
             self.logout()
 
+    def _handle_id_list(self, id_list):
+        strlist = None
+        if hasattr(id_list, "__iter__"):
+            if len(id_list) > 0:
+                strlist = ",".join([str(article) for article in id_list])
+        else:
+            strlist = str(id_list)
+        return strlist
+
     def rest(self, data):
         """ Execute a single REST call to the API with JSON-encoded parameter 'data'."""
         if self.session_id:
@@ -30,7 +39,7 @@ class TinyTinyRSS(object):
         req = requests.get(self.url, json=data)
         data = req.json()
         if data['status'] == 1:
-            raise Exception(data['content']['error'])
+            raise Exception("Server Error -- " + data['content']['error'])
         return data
 
     def getApiLevel(self):
@@ -240,12 +249,12 @@ class TinyTinyRSS(object):
         """
         req = {"op": "updateArticle", "mode": mode, "field": field,
                 "data": data}
-        if hasattr(article_ids, "__iter__"):
-            article_list = [str(article) for article in article_ids]
-            req["article_ids"] = ",".join(article_list)
+        article_string = self._handle_id_list(article_ids)
+        if article_string:
+            req["article_ids"] = article_string
+            return self.rest(req)['content']['updated']
         else:
-            req["article_ids"] = str(article_ids)
-        return self.rest(req)['content']['updated']
+            return 0
 
     def getArticle(self, article_id):
         """
@@ -255,12 +264,12 @@ class TinyTinyRSS(object):
         Since version:1.4.3 also returns article attachments.
         """
         req = {"op": "getArticle"}
-        if hasattr(article_id, "__iter__"):
-            article_list = [str(article) for article in article_id]
-            req["article_id"] = ",".join(article_list)
+        article_string = self._handle_id_list(article_ids)
+        if article_string:
+            req["article_id"] = article_string
+            return self.rest(req)['content']
         else:
-            req["article_id"] = str(article_id)
-        return self.rest(req)['content']
+            return None
 
     def getConfig(self):
         """
@@ -342,12 +351,10 @@ class TinyTinyRSS(object):
             * assign (boolean) - assign or remove label
         """
         req = {"op": "setArticleLabel", "label_id": label_id, "assign": assign}
-        if hasattr(article_ids, "__iter__"):
-            article_list = [str(article) for article in article_ids]
-            req["article_ids"] = ",".join(article_list)
-        else:
-            req["article_ids"] = str(article_ids)
-        self.rest(req)
+        article_string = self._handle_id_list(article_ids)
+        if article_string:
+            req["article_ids"] = article_string
+            self.rest(req)
 
     def shareToPublished(self, title, url, content):
         """
