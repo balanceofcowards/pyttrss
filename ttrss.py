@@ -136,12 +136,8 @@ class TinyTinyRSS(object):
         Known bug: Prior to version:1.5.0 passing null or 0 cat_id to this
         method returns full list of feeds instead of Uncategorized feeds only.
         """
-        params = locals().copy()
-        del params["self"]
-        req = {"op": "getFeeds"}
-        for key, value in params.iteritems():
-            if value:
-                req[key] = value
+        req = {k: v for k, v in locals().iteritems() if v and k != "self"}
+        req["op"] = "getFeeds"
         return self.rest(req)['content']
 
     def getCategories(self, unread_only=None, enable_nested=None,
@@ -161,12 +157,8 @@ class TinyTinyRSS(object):
         (for backwards compatibility) or topmost categories, use getFeeds to
         traverse deeper.
         """
-        params = locals().copy()
-        del params["self"]
-        req = {"op": "getCategories"}
-        for key, value in params.iteritems():
-            if value:
-                req[key] = value
+        req = {k: v for k, v in locals().iteritems() if v and k != "self"}
+        req["op"] = "getCategories"
         return self.rest(req)['content']
 
     def getHeadlines(self, feed_id=None, limit=None, skip=None, filter=None,
@@ -223,12 +215,8 @@ class TinyTinyRSS(object):
             * feed_dates - newest first, goes by feed date
             * (nothing) - default
         """
-        params = locals().copy()
-        del params["self"]
-        req = {"op": "getHeadlines"}
-        for key, value in params.iteritems():
-            if value:
-                req[key] = value
+        req = {k: v for k, v in locals().iteritems() if v and k != "self"}
+        req["op"] = "getHeadlines"
         return self.rest(req)['content']
 
     def updateArticle(self, article_ids, mode, field, data=None):
@@ -249,12 +237,8 @@ class TinyTinyRSS(object):
         """
         req = {"op": "updateArticle", "mode": mode, "field": field,
                 "data": data}
-        article_string = self._handle_id_list(article_ids)
-        if article_string:
-            req["article_ids"] = article_string
-            return self.rest(req)['content']['updated']
-        else:
-            return 0
+        req["article_ids"] = self._handle_id_list(article_ids)
+        return self.rest(req)['content']['updated'] if req["article_ids"] else 0
 
     def getArticle(self, article_id):
         """
@@ -264,12 +248,8 @@ class TinyTinyRSS(object):
         Since version:1.4.3 also returns article attachments.
         """
         req = {"op": "getArticle"}
-        article_string = self._handle_id_list(article_ids)
-        if article_string:
-            req["article_id"] = article_string
-            return self.rest(req)['content']
-        else:
-            return None
+        req["article_id"] = self._handle_id_list(article_id)
+        return self.rest(req)['content'] if req["article_id"] else None
 
     def getConfig(self):
         """
@@ -312,23 +292,6 @@ class TinyTinyRSS(object):
         req = {"op": "catchupFeed", "feed_id": feed_id, "is_cat": is_cat}
         self.rest(req)
 
-    def getCounters(self, output_mode="flc"):
-        """
-        Returns a list of unread article counts for specified feed groups.
-        Parameters:
-            * output_mode (string) - Feed groups to return counters for
-        Output mode is a character string, comprising several letters (defaults
-        to “flc”):
-            f - actual feeds
-            l - labels
-            c - categories
-            t - tags
-        Several global counters are returned as well, those can’t be disabled
-        with output_mode.
-        """
-        req = {"op": "getCounters", "output_mode": output_mode}
-        return self.rest(req)['content']
-
     def getLabels(self, article_id=None):
         """
         Returns list of configured labels, as an array of label objects:
@@ -365,7 +328,7 @@ class TinyTinyRSS(object):
             * content - Article content (string)
         """
         req = {"op": "shareToPublished", "title": title, "url": url,
-                "content": content}
+               "content": content}
         self.rest(req)
 
     def subscribeToFeed(self, feed_url, login, password, category_id = 0):
@@ -379,8 +342,8 @@ class TinyTinyRSS(object):
               Uncategorized) (int)
         """
         req = {"op": "subscribeToFeed", "feed_url": feed_url,
-                "category_id": category_id, "login": login,
-                "password": password}
+               "category_id": category_id, "login": login,
+               "password": password}
         self.rest(req)
 
     def unsubscribeFeed(self, feed_id):

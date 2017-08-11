@@ -28,16 +28,11 @@ def get_conn():
     parser.add_argument('-p', '--password', help='Password')
     parser.add_argument('-U', '--url', help='Server URL')
     args = parser.parse_args()
-    for key, value in vars(args).iteritems():
-        if value:
-            conn[key] = value
 
-    if not conn['user']:
-        conn['user'] = raw_input("Enter username: ")
-    if not conn['password']:
-        conn['password'] = getpass.getpass()
-    if not conn['url']:
-        conn['url'] = raw_input("Enter server URL: ")
+    # Preference: Commandline > Configfile > User input
+    conn['user'] = args.user or conn['user'] or raw_input("Enter username: ")
+    conn['password'] = args.password or conn['password'] or getpass.getpass()
+    conn['url'] = args.url or conn['url'] or raw_input("Enter server URL: ")
     return conn
 
 if __name__ == "__main__":
