@@ -39,7 +39,7 @@ if __name__ == "__main__":
     with TinyTinyRSS(get_conn()) as ttrss:
         print "Unread articles:", ttrss.getUnread()
         read_art_ids = []
-        for article in ttrss.getHeadlines(feed_id=-3):
+        for article in ttrss.getHeadlines(feed_id=-4, view_mode="unread"):
             outstr = u"{:>20} | {}".format(article['feed_title'][:20], article['title'])
             print outstr
             #print article['feed_title'][:20], "\t", article['title']
