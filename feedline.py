@@ -5,7 +5,7 @@ Rapidly display fresh headlines from a TinyTinyRSS instance on the command line.
 
 (c) 2017 Andreas Fischer <_@ndreas.de>
 """
-import subprocess
+import webbrowser
 import argparse
 import getpass
 import json
@@ -40,12 +40,10 @@ if __name__ == "__main__":
         print "Unread articles:", ttrss.getUnread()
         read_art_ids = []
         for article in ttrss.getHeadlines(feed_id=-4, view_mode="unread"):
-            outstr = u"{:>20} | {}".format(article['feed_title'][:20], article['title'])
-            print outstr
-            #print article['feed_title'][:20], "\t", article['title']
+            print u"{:>20} | {}".format(article['feed_title'][:20], article['title'])
             char = readchar.readchar()
             if char == "o":
-                subprocess.call(['xdg-open', article['link']])
+                webbrowser.open(article['link'], 2, False)
             elif char == "s":
                 continue
             elif char == "q":
