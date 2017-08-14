@@ -17,20 +17,29 @@ class ArticleViewer(object):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
         self.window.set_title("Unread article list")
-        self.gtklist = gtk.List()
-        self.window.add(self.gtklist)
-        self.gtklist.show()
+        #self.window.set_geometry_hints(None, min_width=100, min_height=100, max_width=100, max_height=100)
         self.window.connect("destroy", self.hide)
+        self.window.connect("key_press_event", self.on_key_pressed)
 
     def show(self, articles):
-        self.gtklist.clear_items(0,-1)
-        items = [gtk.ListItem(article['title']) for article in articles]
-        self.gtklist.append_items(items)
-        self.window.show()
-        print "hi"
+        treestore = gtk.TreeStore(str)
+        for article in articles:
+            treestore.append(None, [article['title']])
+        treeview = gtk.TreeView(treestore)
+        tvcolumn = gtk.TreeViewColumn('Articles: {}'.format(len(articles)))
+        treeview.append_column(tvcolumn)
+        cell = gtk.CellRendererText()
+        tvcolumn.pack_start(cell, True)
+        tvcolumn.add_attribute(cell, 'text', 0)
+        self.window.add(treeview)
+        self.window.set_position(gtk.WIN_POS_MOUSE)
+        self.window.show_all()
 
-    def hide(self):
+    def hide(self, event):
         self.window.hide()
+
+    def on_key_pressed(self, window, event):
+        pass
 
 class FeedIcon(object):
     def __init__(self, ttrss):
