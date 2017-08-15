@@ -32,7 +32,7 @@ class ArticleViewer(object):
         tvcolumn.pack_start(cell, True)
         tvcolumn.add_attribute(cell, 'text', 0)
         self.window.add(treeview)
-        self.window.set_position(gtk.WIN_POS_MOUSE)
+        self.window.set_position(gtk.WIN_POS_CENTER_ON_PARENT)
         self.window.show_all()
 
     def hide(self, event):
@@ -49,7 +49,7 @@ class FeedIcon(object):
         self.status_icon.set_from_icon_name("mail-read")
         self.update_headlines()
         gtk.timeout_add(1000 * 60, self.update_headlines)
-        self.status_icon.connect("activate", self.show_viewer)
+        self.status_icon.connect("activate", self.toggle_viewer)
 
     def update_headlines(self):
         """
@@ -64,8 +64,11 @@ class FeedIcon(object):
         self.status_icon.set_tooltip_text("Unread articles: {}".format(count))
         return True
 
-    def show_viewer(self, event):
-        self.viewer.show(self.headlines)
+    def toggle_viewer(self, event):
+        if self.viewer.window.get_visible():
+            self.viewer.hide(event)
+        else:
+            self.viewer.show(self.headlines)
 
 if __name__ == "__main__":
     conn = get_conn()
