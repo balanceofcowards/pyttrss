@@ -4,7 +4,7 @@
     This module provides the TinyTinyRSS class as a wrapper around the
     TinyTinyRSS REST API.
 
-    (c) 2017 Andreas Fischer
+    (c) 2017 Andreas Fischer <_@ndreas.de>
 """
 import requests
 
