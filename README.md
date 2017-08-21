@@ -7,4 +7,4 @@ Two example scripts are provided:
   * `feedline.py` is a console utility, displaying all unread articles line by line and either skipping them (press `Space`) or opening them in a webbrowser (press `o`)
   * `gtkfeedline.py` provides similar functionality, creating a statusicon which gives access to the list of unread articles
   
-Bug reports and pull requests are very welcome.
+Bug reports and pull requests are very welcome. Original motivation can be found [in my blog](https://balanceofcowards.net/boc_blog/en/2017/08/english-speeding-up-consumption-of-daily-news-articles/).
